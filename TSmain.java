@@ -119,7 +119,7 @@ class Client extends User {
         
     }
 
-    void registerClient(List<Client> clients, Scanner sc) {
+    void registerClient(List<Client> clients, Scanner sc,List<Client> bikeClients,List<Client> autoClients, List<Client> carClients, List<Client> busClients) {
         Client newClient = new Client(null, null);
         newClient.registerUser(sc);
         System.out.println("Enter the location you're available at : ");
@@ -150,9 +150,27 @@ class Client extends User {
             }
         newClient.assignVehicle(chosen);
         clients.add(newClient);
-        
+        newClient.addToList(bikeClients,autoClients,carClients,busClients);
     }
 
+    void addToList(List<Client> bikeClients,List<Client> autoClients, List<Client> carClients, List<Client> busClients) {
+        switch (this.vehicle) {
+            case Bike bike:
+                bikeClients.add(this);
+                break;
+            case Auto auto:
+                autoClients.add(this);
+                break;
+            case Car car:
+                carClients.add(this);
+                break;
+            case Bus bus:
+                busClients.add(this);
+                break;
+            default:
+                break;                
+        } 
+    }
 
     boolean loginClient(List<Client> clients, String userName, String password) {
         for (Client cl : clients) {
@@ -174,11 +192,12 @@ class Client extends User {
 
 abstract class Vehicle {
     String vehicleType;
+    String[] places = {"MG Road", "HSR Layout" , "Church Street", "Amrita Nagar", "Kasanavanahalli"};
     Vehicle(String vT) {
         this.vehicleType = vT;
     }
 
-    abstract double calcPrice(int duration, boolean is_prem);
+    abstract double calcPrice(int duration, boolean is_prem,int firstCityIndex, int secondCityIndex, int day, int hour,List<Client> cls);
 }
 
 class Bike extends Vehicle {
@@ -186,13 +205,41 @@ class Bike extends Vehicle {
         super("Bike");
     }
 
+    List<Integer> days = new ArrayList<>();
+    List<Integer> hours = new ArrayList<>();
+
     @Override
-    double calcPrice(int duration, boolean is_prem) {
-        if (is_prem) {
-            return duration * 2 * 0.8;
+    double calcPrice(int duration, boolean is_prem, int firstCityIndex, int secondCityIndex, int day, int hour, List<Client> cls) {
+        int count = 0;
+        for (int i = 0; i < days.size(); i++) {
+            if (days.get(i) == day && hours.get(i) == hour) {
+                count++;
+            }
         }
-        return duration*2;
+        days.add(day);
+        hours.add(hour);
+    
+        if (count >= cls.size()) {
+            System.out.println("No Bikes left to depart. Try again later.");
+            System.exit(0);
+        } else if (count >= cls.size() - 5) {
+            cls.remove(cls.size() - 1);
+            if (is_prem) {
+                return duration * 2 * 0.8 * 3;
+            } else {
+                return duration * 2 * 3;
+            }
+        } else {
+            cls.remove(cls.size() - 1);
+            if (is_prem) {
+                return duration * 2 * 0.8;
+            } else {
+                return duration * 2;
+            }
+        }
+        return Double.NaN;
     }
+    
 }
 
 class Auto extends Vehicle {
@@ -200,10 +247,39 @@ class Auto extends Vehicle {
         super("Auto");
     }
 
+    List<Integer> days = new ArrayList<>();
+    List<Integer> hours = new ArrayList<>();
+
     @Override
-    double calcPrice(int duration, boolean is_prem) {
-        if (is_prem) { return duration*3*0.8 ;}
-        return duration * 3;
+    double calcPrice(int duration, boolean is_prem, int firstCityIndex, int secondCityIndex, int day, int hour, List<Client> cls) {
+        int count = 0;
+        for (int i = 0; i < days.size(); i++) {
+            if (days.get(i) == day && hours.get(i) == hour) {
+                count++;
+            }
+        }
+        days.add(day);
+        hours.add(hour);
+    
+        if (count >= cls.size()) {
+            System.out.println("No Autos left to depart. Try again later.");
+            System.exit(0);
+        } else if (count >= cls.size() - 5) {
+            cls.remove(cls.size() - 1);
+            if (is_prem) {
+                return duration * 3 * 0.8 * 3;
+            } else {
+                return duration * 3 * 3;
+            }
+        } else {
+            cls.remove(cls.size() - 1);
+            if (is_prem) {
+                return duration * 3 * 0.8;
+            } else {
+                return duration * 3;
+            }
+        }
+        return Double.NaN;
     }
 }
 
@@ -212,11 +288,41 @@ class Car extends Vehicle {
         super("Car");
     }
 
+    List<Integer> days = new ArrayList<>();
+    List<Integer> hours = new ArrayList<>();
+
     @Override
-    double calcPrice(int duration, boolean is_prem) {
-        if (is_prem) { return duration*5*0.8 ;}
-        return duration * 5;
+    double calcPrice(int duration, boolean is_prem, int firstCityIndex, int secondCityIndex, int day, int hour, List<Client> cls) {
+        int count = 0;
+        for (int i = 0; i < days.size(); i++) {
+            if (days.get(i) == day && hours.get(i) == hour) {
+                count++;
+            }
+        }
+        days.add(day);
+        hours.add(hour);
+    
+        if (count >= cls.size()) {
+            System.out.println("No Cars left to depart. Try again later.");
+            System.exit(0);
+        } else if (count >= cls.size() - 5) {
+            cls.remove(cls.size() - 1);
+            if (is_prem) {
+                return duration * 5 * 0.8 * 3;
+            } else {
+                return duration * 5 * 3;
+            }
+        } else {
+            cls.remove(cls.size() - 1);
+            if (is_prem) {
+                return duration * 5 * 0.8;
+            } else {
+                return duration * 5;
+            }
+        }
+        return Double.NaN;
     }
+
 }
 
 class Bus extends Vehicle {
@@ -224,10 +330,39 @@ class Bus extends Vehicle {
         super("Bus");
     }
 
+    List<Integer> days = new ArrayList<>();
+    List<Integer> hours = new ArrayList<>();
+
     @Override
-    double calcPrice(int duration, boolean is_prem) {
-        if (is_prem) { return duration*0.8 ;}
-        return duration * 1;
+    double calcPrice(int duration, boolean is_prem, int firstCityIndex, int secondCityIndex, int day, int hour, List<Client> cls) {
+        int count = 0;
+        for (int i = 0; i < days.size(); i++) {
+            if (days.get(i) == day && hours.get(i) == hour) {
+                count++;
+            }
+        }
+        days.add(day);
+        hours.add(hour);
+    
+        if (count >= cls.size()) {
+            System.out.println("No Buses left to depart. Try again later.");
+            System.exit(0);
+        } else if (count >= cls.size() - 5) {
+            cls.remove(cls.size() - 1);
+            if (is_prem) {
+                return duration * 0.8 * 3;
+            } else {
+                return duration * 3;
+            }
+        } else {
+            cls.remove(cls.size() - 1);
+            if (is_prem) {
+                return duration * 0.8;
+            } else {
+                return duration;
+            }
+        }
+        return Double.NaN;
     }
 }
 
@@ -236,7 +371,25 @@ public class TSmain {
         Scanner sc = new Scanner(System.in);
         PremiumUser initialPremiumUser = new PremiumUser("premiumUser", "premiumpassword");
         FreemiumUser initialFreemiumUser = new FreemiumUser("freemiumUser", "freemiumpassword");
-        Client initialClient = new Client("client1","1pass");
+        Client initialClient1 = new Client("client1","1pass");
+        Vehicle c1Vehicle = new Bike();
+        initialClient1.assignVehicle(c1Vehicle);
+        initialClient1.currenLocation = "HSR Layout";
+
+        Client initialClient2 = new Client("client2","2pass");
+        Vehicle c2Vehicle = new Auto();
+        initialClient2.assignVehicle(c2Vehicle);
+        initialClient2.currenLocation = "MG Road";
+
+        Client initialClient3 = new Client("client3","3pass");
+        Vehicle c3Vehicle = new Car();
+        initialClient3.assignVehicle(c3Vehicle);
+        initialClient3.currenLocation = "Church Street";
+
+        Client initialClient4 = new Client("client4","4pass");
+        Vehicle c4Vehicle = new Bus();
+        initialClient4.assignVehicle(c4Vehicle);
+        initialClient4.currenLocation = "Amrita Nagar";
 
         List<PremiumUser> premiumUsers = new ArrayList<>();
         premiumUsers.add(initialPremiumUser);
@@ -245,7 +398,24 @@ public class TSmain {
         freemiumUsers.add(initialFreemiumUser);
         
         List<Client> clients = new ArrayList<>();
-        clients.add(initialClient);
+        clients.add(initialClient1);
+        clients.add(initialClient2);
+        clients.add(initialClient3);
+        clients.add(initialClient4);
+
+        List<Client> bikeClients = new ArrayList<>();
+        bikeClients.add(initialClient1);
+
+        List<Client> autoClients = new ArrayList<>();
+        autoClients.add(initialClient2);
+
+        List<Client> carClients = new ArrayList<>();
+        carClients.add(initialClient3);
+
+        List<Client> busClients = new ArrayList<>();
+        busClients.add(initialClient4);
+
+        
         while (true) {
             System.out.println("Welcome to TS");
             System.out.println("Are you : ");
@@ -253,7 +423,7 @@ public class TSmain {
             int UOC = sc.nextInt();
             sc.nextLine();
             TSFlow0 initflow0 = new TSFlow0();
-            initflow0.startFlow(UOC, premiumUsers, freemiumUsers,clients,  sc);
+            initflow0.startFlow(UOC, premiumUsers, freemiumUsers,clients,bikeClients,autoClients,carClients,busClients,sc);
 
         }
     }
@@ -261,7 +431,7 @@ public class TSmain {
 
 
 class TSFlow0 {
-    void startFlow(int n, List<PremiumUser> premiumUsers, List<FreemiumUser> freemiumUsers,List<Client> clients, Scanner sc) {
+    void startFlow(int n, List<PremiumUser> premiumUsers, List<FreemiumUser> freemiumUsers,List<Client> clients,List<Client> bikeClients,List<Client> autoClients,List<Client> carClients,List<Client> busClients, Scanner sc) {
         switch (n) {
             case 1:
                 TSFlow1Consumer initflow1 = new TSFlow1Consumer();
@@ -269,7 +439,12 @@ class TSFlow0 {
                 if (!loginResult[0]) { System.out.println("Exiting."); System.exit(0);}
                 boolean is_prem = loginResult[1];
                 Duration duration = new Duration();
-                int durationOfTravel = duration.calculateDuration(sc);
+                int[] results = duration.calculateDuration(sc);
+                int durationOfTravel = results[0];
+                int firstCityIndex = results[1];
+                int secondCityIndex = results[2];
+                int day = results[3];
+                int hour = results[4];
                 System.out.println("Your journey will be " + durationOfTravel + " minutes long.");
                 System.out.println("Enter the vehicle on which you want to take a ride on ! : ");
                 System.out.println("1 => Bike");
@@ -278,12 +453,12 @@ class TSFlow0 {
                 System.out.println("4 => Bus");
                 int rideCode = sc.nextInt();
                 TSFlow1Alpha initflow1Alpha = new TSFlow1Alpha();
-                double cost = initflow1Alpha.TSflow1Alpha(rideCode, is_prem, durationOfTravel);
+                double cost = initflow1Alpha.TSflow1Alpha(rideCode, is_prem, durationOfTravel, firstCityIndex, secondCityIndex, day, hour,bikeClients,autoClients,carClients,busClients);
                 System.out.println("The total cost of the journey will be : " + cost);
                 break;
             case 2:
                 TSFlow2Client initflow2 = new TSFlow2Client();
-                initflow2.TSflow2(clients, sc);
+                initflow2.TSflow2(clients, sc,bikeClients,autoClients,carClients,busClients);
                 break;
             case 3:
                 System.out.println("Thank you. Visit again");
@@ -386,32 +561,37 @@ class TSFlow1Consumer {
 
 class CalPlaceDuration {
     String places[] = {"MG Road", "HSR Layout" , "Church Street", "Amrita Nagar", "Kasanavanahalli"};
-    int placeDuration(String firstCity,String secondCity) {
+    int[] placeDuration(String firstCity,String secondCity) {
         boolean citiesPresent = false;
         if (firstCity == secondCity || firstCity.isEmpty() || secondCity.isEmpty()) {
             System.out.println("Enter valid input");
             System.exit(0);
         }
         int minuteDistance = 0;
+        int firstCityIndex=0; int secondCityIndex = 0;
         for (int i = 0; i<places.length;i++) {
             if (places[i].equalsIgnoreCase(firstCity)) {
                 for (int j =i+1;j<places.length;j++) {
                     if (places[j].equalsIgnoreCase(secondCity)) {
                         citiesPresent = true;
                         minuteDistance = indexdiff(i, j);
+                        firstCityIndex = i;
+                        secondCityIndex = j;
                     }
                 }
                 for (int j=0;j<i;j++) {
                     if (places[j].equalsIgnoreCase(secondCity)) {
                         citiesPresent = true;
                         minuteDistance = indexdiff(j, i);
+                        firstCityIndex = i;
+                        secondCityIndex = j;
                     }
                 }
             }
             
         }
         if (citiesPresent) {
-            return minuteDistance;
+            return new int[] {minuteDistance, firstCityIndex, secondCityIndex};
         } else {
             throw new RuntimeException("Invalid city.");
         }
@@ -440,13 +620,16 @@ class Duration {
             System.exit(0);
         }
     }
-    int calculateDuration(Scanner sc) {
+    int[] calculateDuration(Scanner sc) {
         System.out.println("Enter your current location : ");
         String location = sc.nextLine();
         System.out.println("Enter your drop-off location : ");
         String dropOff = sc.nextLine();
         CalPlaceDuration placeDists = new CalPlaceDuration();
-        int minuteDist = placeDists.placeDuration(location, dropOff);
+        int[] results = placeDists.placeDuration(location, dropOff);
+        int minuteDist = results[0];
+        int firstCityIndex = results[1];
+        int secondCityIndex = results[2];
         System.out.println("Enter the Day (1 - Sunday.....7 - Saturday): ");
         int day = sc.nextInt();
         checkDay(day);
@@ -454,13 +637,13 @@ class Duration {
         int hour = sc.nextInt();
         checkTime(hour);
         if (hour >16 && hour < 21 && (day == 1 || day == 7 || day == 6 || day == 2)) {
-            return minuteDist + 20 + 10;
+            return new int[]  {minuteDist + 20 + 10, firstCityIndex, secondCityIndex, day, hour};
         } else if (hour >16 && hour < 21) {
-            return minuteDist + 20;
+            return new int[]  {minuteDist + 20, firstCityIndex, secondCityIndex, day, hour};
         } else if (day == 1 || day == 7 || day == 6 || day == 2) {
-            return minuteDist + 10;
+            return new int[] {minuteDist + 10, firstCityIndex, secondCityIndex, day, hour};
         } else {
-            return minuteDist;
+            return new int[] {minuteDist, firstCityIndex, secondCityIndex, day, hour};
         }
     } 
     void checkTime(int hour) {
@@ -472,24 +655,24 @@ class Duration {
 }
 
 class TSFlow1Alpha {
-    double TSflow1Alpha(int rideCode, boolean is_prem, int durationOfTravel) {
+    double TSflow1Alpha(int rideCode, boolean is_prem, int durationOfTravel, int firstCityIndex, int secondCityIndex, int day, int hour,List<Client> bikeClients,List<Client> autoClients,List<Client> carClients,List<Client> busClients) {
         if (rideCode != 1 && rideCode != 2 && rideCode !=3 && rideCode!= 4) {
-            System.out.println("Invalide input");
+            System.out.println("Invalid input");
             System.exit(0);
         }
         switch (rideCode) {
             case 1:
                 Vehicle rideB = new Bike();
-                return rideB.calcPrice(durationOfTravel, is_prem);
+                return rideB.calcPrice(durationOfTravel, is_prem,firstCityIndex,secondCityIndex,day,hour,bikeClients);
             case 2:
                 Vehicle rideA = new Auto();
-                return rideA.calcPrice(durationOfTravel, is_prem);
+                return rideA.calcPrice(durationOfTravel, is_prem,firstCityIndex,secondCityIndex,day,hour,autoClients);
             case 3:
                 Vehicle rideC = new Car();
-                return rideC.calcPrice(durationOfTravel, is_prem);
+                return rideC.calcPrice(durationOfTravel, is_prem,firstCityIndex,secondCityIndex,day, hour, carClients);
             case 4:
                 Vehicle rideBus = new Bus();
-                return rideBus.calcPrice(durationOfTravel, is_prem);
+                return rideBus.calcPrice(durationOfTravel, is_prem, firstCityIndex,secondCityIndex,day,hour, busClients);
             default:
                 System.out.println("Enter valid input ");
                 break;        
@@ -499,7 +682,7 @@ class TSFlow1Alpha {
 }
 
 class TSFlow2Client {
-    void TSflow2(List<Client> clients, Scanner sc) {
+    void TSflow2(List<Client> clients, Scanner sc,List<Client> bikeClients,List<Client> autoClients,List<Client> carClients,List<Client> busClients) {
         System.out.println("Welcome Client");
         System.out.println("Choose from the options below : ");
         System.out.println("1) Login");
@@ -519,7 +702,7 @@ class TSFlow2Client {
             case 2:
                 
                 Client regClient = new Client("", "");
-                regClient.registerClient(clients, sc);
+                regClient.registerClient(clients, sc,bikeClients,autoClients,carClients,busClients);
                 System.out.println("Welcome Aboard !");
                 break;
             
