@@ -197,7 +197,7 @@ abstract class Vehicle {
         this.vehicleType = vT;
     }
 
-    abstract double calcPrice(int duration, boolean is_prem,int firstCityIndex, int secondCityIndex, int day, int hour,List<Client> cls);
+    abstract double calcPrice(int duration, boolean is_prem, int day, int hour,List<Client> cls);
 }
 
 class Bike extends Vehicle {
@@ -209,7 +209,7 @@ class Bike extends Vehicle {
     List<Integer> hours = new ArrayList<>();
 
     @Override
-    double calcPrice(int duration, boolean is_prem, int firstCityIndex, int secondCityIndex, int day, int hour, List<Client> cls) {
+    double calcPrice(int duration, boolean is_prem, int day, int hour, List<Client> cls) {
         int count = 0;
         for (int i = 0; i < days.size(); i++) {
             if (days.get(i) == day && hours.get(i) == hour) {
@@ -251,7 +251,7 @@ class Auto extends Vehicle {
     List<Integer> hours = new ArrayList<>();
 
     @Override
-    double calcPrice(int duration, boolean is_prem, int firstCityIndex, int secondCityIndex, int day, int hour, List<Client> cls) {
+    double calcPrice(int duration, boolean is_prem, int day, int hour, List<Client> cls) {
         int count = 0;
         for (int i = 0; i < days.size(); i++) {
             if (days.get(i) == day && hours.get(i) == hour) {
@@ -292,7 +292,7 @@ class Car extends Vehicle {
     List<Integer> hours = new ArrayList<>();
 
     @Override
-    double calcPrice(int duration, boolean is_prem, int firstCityIndex, int secondCityIndex, int day, int hour, List<Client> cls) {
+    double calcPrice(int duration, boolean is_prem, int day, int hour, List<Client> cls) {
         int count = 0;
         for (int i = 0; i < days.size(); i++) {
             if (days.get(i) == day && hours.get(i) == hour) {
@@ -334,7 +334,7 @@ class Bus extends Vehicle {
     List<Integer> hours = new ArrayList<>();
 
     @Override
-    double calcPrice(int duration, boolean is_prem, int firstCityIndex, int secondCityIndex, int day, int hour, List<Client> cls) {
+    double calcPrice(int duration, boolean is_prem, int day, int hour, List<Client> cls) {
         int count = 0;
         for (int i = 0; i < days.size(); i++) {
             if (days.get(i) == day && hours.get(i) == hour) {
@@ -441,10 +441,8 @@ class TSFlow0 {
                 Duration duration = new Duration();
                 int[] results = duration.calculateDuration(sc);
                 int durationOfTravel = results[0];
-                int firstCityIndex = results[1];
-                int secondCityIndex = results[2];
-                int day = results[3];
-                int hour = results[4];
+                int day = results[1];
+                int hour = results[2];
                 System.out.println("Your journey will be " + durationOfTravel + " minutes long.");
                 System.out.println("Enter the vehicle on which you want to take a ride on ! : ");
                 System.out.println("1 => Bike");
@@ -453,7 +451,7 @@ class TSFlow0 {
                 System.out.println("4 => Bus");
                 int rideCode = sc.nextInt();
                 TSFlow1Alpha initflow1Alpha = new TSFlow1Alpha();
-                double cost = initflow1Alpha.TSflow1Alpha(rideCode, is_prem, durationOfTravel, firstCityIndex, secondCityIndex, day, hour,bikeClients,autoClients,carClients,busClients);
+                double cost = initflow1Alpha.TSflow1Alpha(rideCode, is_prem, durationOfTravel, day, hour,bikeClients,autoClients,carClients,busClients);
                 System.out.println("The total cost of the journey will be : " + cost);
                 break;
             case 2:
@@ -568,30 +566,28 @@ class CalPlaceDuration {
             System.exit(0);
         }
         int minuteDistance = 0;
-        int firstCityIndex=0; int secondCityIndex = 0;
+        
         for (int i = 0; i<places.length;i++) {
             if (places[i].equalsIgnoreCase(firstCity)) {
                 for (int j =i+1;j<places.length;j++) {
                     if (places[j].equalsIgnoreCase(secondCity)) {
                         citiesPresent = true;
                         minuteDistance = indexdiff(i, j);
-                        firstCityIndex = i;
-                        secondCityIndex = j;
+                        
                     }
                 }
                 for (int j=0;j<i;j++) {
                     if (places[j].equalsIgnoreCase(secondCity)) {
                         citiesPresent = true;
                         minuteDistance = indexdiff(j, i);
-                        firstCityIndex = i;
-                        secondCityIndex = j;
+                        
                     }
                 }
             }
             
         }
         if (citiesPresent) {
-            return new int[] {minuteDistance, firstCityIndex, secondCityIndex};
+            return new int[] {minuteDistance};
         } else {
             throw new RuntimeException("Invalid city.");
         }
@@ -628,8 +624,7 @@ class Duration {
         CalPlaceDuration placeDists = new CalPlaceDuration();
         int[] results = placeDists.placeDuration(location, dropOff);
         int minuteDist = results[0];
-        int firstCityIndex = results[1];
-        int secondCityIndex = results[2];
+        
         System.out.println("Enter the Day (1 - Sunday.....7 - Saturday): ");
         int day = sc.nextInt();
         checkDay(day);
@@ -637,13 +632,13 @@ class Duration {
         int hour = sc.nextInt();
         checkTime(hour);
         if (hour >16 && hour < 21 && (day == 1 || day == 7 || day == 6 || day == 2)) {
-            return new int[]  {minuteDist + 20 + 10, firstCityIndex, secondCityIndex, day, hour};
+            return new int[]  {minuteDist + 20 + 10, day, hour};
         } else if (hour >16 && hour < 21) {
-            return new int[]  {minuteDist + 20, firstCityIndex, secondCityIndex, day, hour};
+            return new int[]  {minuteDist + 20, day, hour};
         } else if (day == 1 || day == 7 || day == 6 || day == 2) {
-            return new int[] {minuteDist + 10, firstCityIndex, secondCityIndex, day, hour};
+            return new int[] {minuteDist + 10, day, hour};
         } else {
-            return new int[] {minuteDist, firstCityIndex, secondCityIndex, day, hour};
+            return new int[] {minuteDist, day, hour};
         }
     } 
     void checkTime(int hour) {
@@ -655,7 +650,7 @@ class Duration {
 }
 
 class TSFlow1Alpha {
-    double TSflow1Alpha(int rideCode, boolean is_prem, int durationOfTravel, int firstCityIndex, int secondCityIndex, int day, int hour,List<Client> bikeClients,List<Client> autoClients,List<Client> carClients,List<Client> busClients) {
+    double TSflow1Alpha(int rideCode, boolean is_prem, int durationOfTravel, int day, int hour,List<Client> bikeClients,List<Client> autoClients,List<Client> carClients,List<Client> busClients) {
         if (rideCode != 1 && rideCode != 2 && rideCode !=3 && rideCode!= 4) {
             System.out.println("Invalid input");
             System.exit(0);
@@ -663,16 +658,16 @@ class TSFlow1Alpha {
         switch (rideCode) {
             case 1:
                 Vehicle rideB = new Bike();
-                return rideB.calcPrice(durationOfTravel, is_prem,firstCityIndex,secondCityIndex,day,hour,bikeClients);
+                return rideB.calcPrice(durationOfTravel, is_prem,day,hour,bikeClients);
             case 2:
                 Vehicle rideA = new Auto();
-                return rideA.calcPrice(durationOfTravel, is_prem,firstCityIndex,secondCityIndex,day,hour,autoClients);
+                return rideA.calcPrice(durationOfTravel, is_prem,day,hour,autoClients);
             case 3:
                 Vehicle rideC = new Car();
-                return rideC.calcPrice(durationOfTravel, is_prem,firstCityIndex,secondCityIndex,day, hour, carClients);
+                return rideC.calcPrice(durationOfTravel, is_prem,day, hour, carClients);
             case 4:
                 Vehicle rideBus = new Bus();
-                return rideBus.calcPrice(durationOfTravel, is_prem, firstCityIndex,secondCityIndex,day,hour, busClients);
+                return rideBus.calcPrice(durationOfTravel, is_prem,day,hour, busClients);
             default:
                 System.out.println("Enter valid input ");
                 break;        
