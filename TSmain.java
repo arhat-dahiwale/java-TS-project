@@ -60,7 +60,7 @@ class PremiumUser extends Consumer {
     
     boolean loginUser(List<PremiumUser> premiumUsers, String userName, String password) {
         for (PremiumUser premU : premiumUsers) {
-            if (premU.userName.equals(userName) && premU.password.equals(password)) {
+            if (premU.userName.equals(userName.trim()) && premU.password.equals(password.trim())) {
                 System.out.println("Login successfull");
                 return true;
             } 
@@ -95,7 +95,7 @@ class FreemiumUser extends Consumer {
 
     boolean loginUser(List<FreemiumUser> freemiumUsers, String userName, String password)  {
         for (FreemiumUser freeU : freemiumUsers) {
-            if (freeU.userName.equals(userName) && freeU.password.equals(password)) {
+            if (freeU.userName.equals(userName.trim()) && freeU.password.equals(password.trim())) {
                 System.out.println("Login successfull");
                 return true;
             }
@@ -198,6 +198,9 @@ abstract class Vehicle {
     }
 
     abstract double calcPrice(int duration, boolean is_prem, int day, int hour,List<Client> cls);
+
+    static class BookingTime { int day,hour; BookingTime(int d,int h){day=d;hour=h;} }
+    static List<BookingTime> bookings = new ArrayList<>();
 }
 
 class Bike extends Vehicle {
@@ -205,39 +208,30 @@ class Bike extends Vehicle {
         super("Bike");
     }
 
-    List<Integer> days = new ArrayList<>();
-    List<Integer> hours = new ArrayList<>();
-
     @Override
     double calcPrice(int duration, boolean is_prem, int day, int hour, List<Client> cls) {
         int count = 0;
-        for (int i = 0; i < days.size(); i++) {
-            if (days.get(i) == day && hours.get(i) == hour) {
-                count++;
-            }
+        for (var bt : bookings) {
+            if (bt.day == day && bt.hour == hour) {count++;}
         }
-        days.add(day);
-        hours.add(hour);
+        bookings.add(new BookingTime(day,hour));
+        
     
-        if (count >= cls.size()) {
-            System.out.println("No Bikes left to depart. Try again later.");
+        if (count==0) {
+            return duration * 2 * (is_prem? 0.8 : 1.0);
+        } 
+        
+        if (!cls.isEmpty()) { cls.remove(cls.size()-1);}
+
+        if (cls.isEmpty()) {
+            System.out.println("No Bikes left to depart. Please try again later.");
             System.exit(0);
-        } else if (count >= cls.size() - 5) {
-            cls.remove(cls.size() - 1);
-            if (is_prem) {
-                return duration * 2 * 0.8 * 3;
-            } else {
-                return duration * 2 * 3;
-            }
-        } else {
-            cls.remove(cls.size() - 1);
-            if (is_prem) {
-                return duration * 2 * 0.8;
-            } else {
-                return duration * 2;
-            }
         }
-        return Double.NaN;
+
+        if (cls.size() <=5) { return duration * 2 * (is_prem? 0.8 : 1.0) * 3;}
+
+
+        return duration * 2 * (is_prem? 0.8 : 1.0);
     }
     
 }
@@ -247,39 +241,31 @@ class Auto extends Vehicle {
         super("Auto");
     }
 
-    List<Integer> days = new ArrayList<>();
-    List<Integer> hours = new ArrayList<>();
 
     @Override
     double calcPrice(int duration, boolean is_prem, int day, int hour, List<Client> cls) {
         int count = 0;
-        for (int i = 0; i < days.size(); i++) {
-            if (days.get(i) == day && hours.get(i) == hour) {
-                count++;
-            }
+        for (var bt : bookings) {
+            if (bt.day == day && bt.hour == hour) {count++;}
         }
-        days.add(day);
-        hours.add(hour);
+        bookings.add(new BookingTime(day,hour));
+        
     
-        if (count >= cls.size()) {
-            System.out.println("No Autos left to depart. Try again later.");
+        if (count==0) {
+            return duration * 3 * (is_prem? 0.8 : 1.0);
+        } 
+        
+        if (!cls.isEmpty()) { cls.remove(cls.size()-1);}
+
+        if (cls.isEmpty()) {
+            System.out.println("No Autos left to depart. Please try again later.");
             System.exit(0);
-        } else if (count >= cls.size() - 5) {
-            cls.remove(cls.size() - 1);
-            if (is_prem) {
-                return duration * 3 * 0.8 * 3;
-            } else {
-                return duration * 3 * 3;
-            }
-        } else {
-            cls.remove(cls.size() - 1);
-            if (is_prem) {
-                return duration * 3 * 0.8;
-            } else {
-                return duration * 3;
-            }
         }
-        return Double.NaN;
+
+        if (cls.size() <=5) { return duration * 3 * (is_prem? 0.8 : 1.0) * 3;}
+
+
+        return duration * 3 * (is_prem? 0.8 : 1.0);
     }
 }
 
@@ -288,39 +274,31 @@ class Car extends Vehicle {
         super("Car");
     }
 
-    List<Integer> days = new ArrayList<>();
-    List<Integer> hours = new ArrayList<>();
 
     @Override
     double calcPrice(int duration, boolean is_prem, int day, int hour, List<Client> cls) {
         int count = 0;
-        for (int i = 0; i < days.size(); i++) {
-            if (days.get(i) == day && hours.get(i) == hour) {
-                count++;
-            }
+        for (var bt : bookings) {
+            if (bt.day == day && bt.hour == hour) {count++;}
         }
-        days.add(day);
-        hours.add(hour);
+        bookings.add(new BookingTime(day,hour));
+        
     
-        if (count >= cls.size()) {
-            System.out.println("No Cars left to depart. Try again later.");
+        if (count==0) {
+            return duration * 5 * (is_prem? 0.8 : 1.0);
+        } 
+        
+        if (!cls.isEmpty()) { cls.remove(cls.size()-1);}
+
+        if (cls.isEmpty()) {
+            System.out.println("No Cars left to depart. Please try again later.");
             System.exit(0);
-        } else if (count >= cls.size() - 5) {
-            cls.remove(cls.size() - 1);
-            if (is_prem) {
-                return duration * 5 * 0.8 * 3;
-            } else {
-                return duration * 5 * 3;
-            }
-        } else {
-            cls.remove(cls.size() - 1);
-            if (is_prem) {
-                return duration * 5 * 0.8;
-            } else {
-                return duration * 5;
-            }
         }
-        return Double.NaN;
+
+        if (cls.size() <=5) { return duration * 5 * (is_prem? 0.8 : 1.0) * 3;}
+
+
+        return duration * 5 * (is_prem? 0.8 : 1.0);
     }
 
 }
@@ -330,39 +308,31 @@ class Bus extends Vehicle {
         super("Bus");
     }
 
-    List<Integer> days = new ArrayList<>();
-    List<Integer> hours = new ArrayList<>();
 
     @Override
     double calcPrice(int duration, boolean is_prem, int day, int hour, List<Client> cls) {
         int count = 0;
-        for (int i = 0; i < days.size(); i++) {
-            if (days.get(i) == day && hours.get(i) == hour) {
-                count++;
-            }
+        for (var bt : bookings) {
+            if (bt.day == day && bt.hour == hour) {count++;}
         }
-        days.add(day);
-        hours.add(hour);
+        bookings.add(new BookingTime(day,hour));
+        
     
-        if (count >= cls.size()) {
-            System.out.println("No Buses left to depart. Try again later.");
+        if (count==0) {
+            return duration * 1 * (is_prem? 0.8 : 1.0);
+        } 
+        
+        if (!cls.isEmpty()) { cls.remove(cls.size()-1);}
+
+        if (cls.isEmpty()) {
+            System.out.println("No Buses left to depart. Please try again later.");
             System.exit(0);
-        } else if (count >= cls.size() - 5) {
-            cls.remove(cls.size() - 1);
-            if (is_prem) {
-                return duration * 0.8 * 3;
-            } else {
-                return duration * 3;
-            }
-        } else {
-            cls.remove(cls.size() - 1);
-            if (is_prem) {
-                return duration * 0.8;
-            } else {
-                return duration;
-            }
         }
-        return Double.NaN;
+
+        if (cls.size() <=5) { return duration * 1 * (is_prem? 0.8 : 1.0) * 3;}
+
+
+        return duration * 1 * (is_prem? 0.8 : 1.0);
     }
 }
 
