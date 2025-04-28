@@ -200,10 +200,12 @@ abstract class Vehicle {
     abstract double calcPrice(int duration, boolean is_prem, int day, int hour,List<Client> cls);
 
     static class BookingTime { int day,hour; BookingTime(int d,int h){day=d;hour=h;} }
-    static List<BookingTime> bookings = new ArrayList<>();
+    
 }
 
 class Bike extends Vehicle {
+
+    List<BookingTime> bookings = new ArrayList<>();
     Bike() {
         super("Bike");
     }
@@ -237,6 +239,7 @@ class Bike extends Vehicle {
 }
 
 class Auto extends Vehicle {
+    List<BookingTime> bookings = new ArrayList<>();
     Auto() {
         super("Auto");
     }
@@ -270,6 +273,7 @@ class Auto extends Vehicle {
 }
 
 class Car extends Vehicle {
+    List<BookingTime> bookings = new ArrayList<>();
     Car() {
         super("Car");
     }
@@ -304,6 +308,7 @@ class Car extends Vehicle {
 }
 
 class Bus extends Vehicle {
+    List<BookingTime> bookings = new ArrayList<>();
     Bus() {
         super("Bus");
     }
